@@ -70,7 +70,6 @@
                 <data android:scheme="http" />
                 <data android:scheme="ftp" />
                 <data android:host="*" />
-                <data android:pathPattern=".*\\.vrz" />
             </intent-filter>
         </activity>
         <service android:name="VimTermService" />

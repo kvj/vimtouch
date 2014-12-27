@@ -80,8 +80,6 @@ import java.util.List;
 
 import jackpal.androidterm.emulatorview.ColorScheme;
 import jackpal.androidterm.emulatorview.TermSession;
-import kvj.app.vimtouch.addons.PluginAddOn;
-import kvj.app.vimtouch.addons.PluginFactory;
 import kvj.app.vimtouch.compat.AndroidCompat;
 import kvj.app.vimtouch.ext.manager.IntegrationManager;
 import kvj.app.vimtouch.ext.manager.impl.InputExtension;
@@ -503,21 +501,6 @@ public class VimTouch extends ActionBarActivity implements
         return new TermView(this, session, metrics);
     }
 
-    private boolean checkPlugins() {
-        // check plugins which not installed yet first
-        ArrayList<PluginAddOn> plugins = PluginFactory.getAllPlugins(getApplicationContext());
-        for (PluginAddOn addon : plugins) {
-            if (!addon.isInstalled(getApplicationContext())) {
-                Intent intent = new Intent(getApplicationContext(), InstallProgress.class);
-                intent.setData(Uri.parse("plugin://" + addon.getId()));
-                startActivityForResult(intent, REQUEST_INSTALL);
-                return false;
-            }
-        }
-
-        return true;
-    }
-
     private void startEmulator() {
         File appDir = new File(getApplicationContext().getFilesDir().getParentFile(), "lib");
         File[] files = appDir.listFiles();
@@ -547,20 +530,8 @@ public class VimTouch extends ActionBarActivity implements
 
     private boolean checkVimRuntime() {
         if (InstallProgress.isInstalled(this)) {
-            return checkPlugins();
+            return true;
         }
-
-        // check default package
-        /* FIXME: we won't change default runtime for long time , but it's better to re-check again later.
-        PackageInfo info;
-        try {
-            info = getPackageManager().getPackageInfo(getPackageName(), PackageManager.GET_META_DATA);
-            if(mSettings.getLastVersionCode() == info.versionCode)
-                return checkPlugins();
-        } catch (PackageManager.NameNotFoundException e) {
-        }
-        */
-
         Intent intent = new Intent(getApplicationContext(), InstallProgress.class);
         startActivityForResult(intent, REQUEST_INSTALL);
 

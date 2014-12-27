@@ -30,15 +30,9 @@ import java.lang.ref.WeakReference;
 import java.math.BigInteger;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
-import java.util.ArrayList;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
-
-import kvj.app.vimtouch.addons.PluginAddOn;
-import kvj.app.vimtouch.addons.PluginFactory;
-import kvj.app.vimtouch.addons.RuntimeAddOn;
-import kvj.app.vimtouch.addons.RuntimeFactory;
 
 public class InstallProgress extends Activity {
     public static final String LOG_TAG = "VIM Installation";
@@ -47,10 +41,9 @@ public class InstallProgress extends Activity {
     private TextView mProgressText;
 
     private void installDefaultRuntime() {
-        ArrayList<RuntimeAddOn> runtimes = RuntimeFactory.getAllRuntimes(getApplicationContext());
+
         try{
 
-        if(runtimes.size() == 0) {
             MessageDigest md = MessageDigest.getInstance("MD5");
             InputStream is = new DigestInputStream(getResources().openRawResource(R.raw.vim),md);
             installZip(is, null, "Default Runtime");
@@ -67,19 +60,6 @@ public class InstallProgress extends Activity {
             Log.e(LOG_TAG, "compute md5 "+result);
             fout.write(result);
             fout.close();
-        }else{
-            Context context = getApplicationContext();
-            for (RuntimeAddOn rt: runtimes){
-                if(!rt.isInstalled(context)){
-                    InputStream input = rt.getPackageContext().getAssets().openFd(rt.getAssetName()).createInputStream();
-                    rt.initTypeDir(context);
-                    FileWriter fw = new FileWriter(rt.getFileListName(context));
-                    installZip(input,fw, rt.getDescription());
-                    fw.close();
-                    rt.setInstalled(context,true);
-                }
-            }
-        }
 
         installZip(getResources().openRawResource(R.raw.terminfo),null, "Terminfo");
         File folder = new File(this.getApplicationContext().getFilesDir()+"/vim");
@@ -107,9 +87,6 @@ public class InstallProgress extends Activity {
     }
 
     private static boolean checkMD5(Activity activity){
-        ArrayList<RuntimeAddOn> runtimes = RuntimeFactory.getAllRuntimes(activity.getApplicationContext());
-        if(runtimes.size() > 0)  return true;
-
         File md5 = new File(getMD5Filename(activity));
         if(!md5.exists()){
             Log.w(LOG_TAG, "No MD5 file");
@@ -133,15 +110,6 @@ public class InstallProgress extends Activity {
 
     public static boolean isInstalled(Activity activity){
         // check runtimes which not installed yet first
-        ArrayList<RuntimeAddOn> runtimes = RuntimeFactory.getAllRuntimes(activity.getApplicationContext());
-        for (RuntimeAddOn rt: runtimes){
-            if(!rt.isInstalled(activity.getApplicationContext())){
-                Log.w(LOG_TAG, "Not installed runtime: "+rt);
-                return false;
-            }
-        }
-        
-
         File vimrc = new File(getVimrc(activity));
         if(vimrc.exists()){
             // Compare size to make sure the sys vimrc doesn't change
@@ -255,30 +223,6 @@ public class InstallProgress extends Activity {
                 }else if (mUri.getScheme().equals("file")) {
                     installLocalFile();
                     showNotification(R.string.install_finish);
-                }else if (mUri.getScheme().equals("plugin")){
-                    PluginAddOn plugin = PluginFactory.getPluginById( mUri.getAuthority(), context);
-                    try{
-                        InputStream input = plugin.getPackageContext().getAssets().openFd(plugin.getAssetName()).createInputStream();
-                        plugin.initTypeDir(context);
-                        FileWriter fw = new FileWriter(plugin.getFileListName(context));
-                        installZip(input,fw, plugin.getDescription());
-                        fw.close();
-                        plugin.setInstalled(context,true);
-                        showNotification(R.string.install_finish);
-                    }catch(Exception e){
-                    }
-                }else if (mUri.getScheme().equals("runtime")){
-                    RuntimeAddOn runtime = RuntimeFactory.getRuntimeById( mUri.getAuthority(), context);
-                    try{
-                        InputStream input = runtime.getPackageContext().getAssets().openFd(runtime.getAssetName()).createInputStream();
-                        runtime.initTypeDir(context);
-                        FileWriter fw = new FileWriter(runtime.getFileListName(context));
-                        installZip(input,fw, runtime.getDescription());
-                        fw.close();
-                        runtime.setInstalled(context,true);
-                        showNotification(R.string.install_finish);
-                    }catch(Exception e){
-                    }
                 }else if (mUri.getScheme().equals("content")){
                     try{
                         InputStream attachment = getContentResolver().openInputStream(mUri);
@@ -289,22 +233,7 @@ public class InstallProgress extends Activity {
                 }
 
                 // check plugins which not installed yet first
-                ArrayList<PluginAddOn> plugins = PluginFactory.getAllPlugins(getApplicationContext());
-                for (PluginAddOn plugin: plugins){
-                    if(!plugin.isInstalled(getApplicationContext())){
-                        try{
-                            InputStream input = plugin.getPackageContext().getAssets().openFd(plugin.getAssetName()).createInputStream();
-                            plugin.initTypeDir(context);
-                            FileWriter fw = new FileWriter(plugin.getFileListName(context));
-                            installZip(input,fw, plugin.getDescription());
-                            fw.close();
-                            plugin.setInstalled(context,true);
-                            showNotification(R.string.install_finish);
-                        }catch(Exception e){
-                        }
-                    }
-                }
-        
+
                 finish();
 
             }
