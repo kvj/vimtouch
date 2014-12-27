@@ -47,12 +47,17 @@ public class VimInputConnection extends BaseInputConnection
     private void syncEditable() {
         Editable editable = getEditable();
 
-        if(!editable.toString().equals(Exec.getCurrentLine(0))) {
-            setEditable(Exec.getCurrentLine(0));
+        String line = Exec.getCurrentLine(0);
+        if (line == null) line = "";
+        if(!editable.toString().equals(line)) {
+            setEditable(line);
         }
 
         int end = Selection.getSelectionEnd(editable);
-        int col = Exec.getCursorCol()>0?Exec.getCurrentLine(Exec.getCursorCol()).length():0;
+
+        line = Exec.getCurrentLine(Exec.getCursorCol());
+        if (line == null) line = "";
+        int col = Exec.getCursorCol()>0?line.length():0;
 
         if(col != end){
             setSelection(col,col);
@@ -74,7 +79,9 @@ public class VimInputConnection extends BaseInputConnection
         int start = getComposingSpanStart(editable);
         int end = getComposingSpanEnd(editable);
         if (start < 0 || end < 0) {
-            int col = Exec.getCursorCol()>0?Exec.getCurrentLine(Exec.getCursorCol()).length():0;
+            String line = Exec.getCurrentLine(Exec.getCursorCol());
+            if (line == null) line = "";
+            int col = Exec.getCursorCol()>0?line.length():0;
             setSelection(col,col);
             //start = Selection.getSelectionStart(editable);
             //end = Selection.getSelectionEnd(editable);
@@ -130,6 +137,9 @@ public class VimInputConnection extends BaseInputConnection
     }
 
     public void setEditable(String contents) {
+        if (null == contents) {
+            contents = "";
+        }
         Editable editable = getEditable();
         editable.removeSpan(this);
         editable.replace(0, editable.length(), contents);
@@ -138,6 +148,9 @@ public class VimInputConnection extends BaseInputConnection
     }
 
     public void initEditable(String contents) {
+        if (null == contents) {
+            contents = "";
+        }
         Editable editable = getEditable();
         editable.replace(0, editable.length(), contents);
         editable.setSpan(this, 0, contents.length(), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
@@ -148,12 +161,6 @@ public class VimInputConnection extends BaseInputConnection
     @Override
     public boolean setSelection(int start, int end) {
         boolean result = super.setSelection(start, end);
-        return result;
-    }
-
-    @Override
-    public boolean setComposingRegion(int start, int end) {
-        boolean result = super.setComposingRegion(start, end);
         return result;
     }
 
@@ -208,6 +215,7 @@ public class VimInputConnection extends BaseInputConnection
 
     public void notifyTextChange() {
         String text = Exec.getCurrentLine(0);
+        if (text == null) text = "";
         if (!mBatchMode) {
             if (!text.contentEquals(getEditable())) {
                 setEditable(text);
@@ -219,7 +227,9 @@ public class VimInputConnection extends BaseInputConnection
         Context context = mView.getContext();
         InputMethodManager imm = (InputMethodManager)context.getSystemService(Context.INPUT_METHOD_SERVICE);
 
-        int newEnd = Exec.getCursorCol()>0?Exec.getCurrentLine(Exec.getCursorCol()).length():0;
+        String line = Exec.getCurrentLine(Exec.getCursorCol());
+        if (line == null) line = "";
+        int newEnd = Exec.getCursorCol()>0?line.length():0;
         int end = Selection.getSelectionEnd(content);
 
         if(newEnd != end){
@@ -256,7 +266,7 @@ public class VimInputConnection extends BaseInputConnection
         int col = Exec.getCursorCol();
         if(col == 0) return "";
         String line = Exec.getCurrentLine(col);
-        if(line.length() == 0) return "";
+        if(null == line || line.length() == 0) return "";
         if(DEBUG) Log.e(LOGTAG, "getTextBeforeCursor result " + line);
 
         if(length > line.length()) return line;
@@ -272,9 +282,10 @@ public class VimInputConnection extends BaseInputConnection
         syncEditable();
 
         String line = Exec.getCurrentLine(0);
-        if(line.length() == 0) return "";
+        if(line == null || line.length() == 0) return "";
 
         String before = Exec.getCurrentLine(Exec.getCursorCol());
+        if (null == before) before = "";
 
         String after = line.substring(before.length());
         if(DEBUG) Log.e(LOGTAG, "getTextAfterCursor result " + after);
