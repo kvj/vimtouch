@@ -85,6 +85,7 @@ import kvj.app.vimtouch.ext.manager.IntegrationManager;
 import kvj.app.vimtouch.ext.manager.impl.InputExtension;
 import kvj.app.vimtouch.ext.manager.impl.QuickbarExtension;
 import kvj.app.vimtouch.ext.manager.impl.ToastExtension;
+import kvj.app.vimtouch.ext.manager.impl.WidgetExtension;
 
 
 /**
@@ -479,6 +480,8 @@ public class VimTouch extends ActionBarActivity implements
             new QuickbarExtension(this));
         IntegrationManager.getInstance(this).addExtension(
             new InputExtension(this));
+        IntegrationManager.getInstance(this).addExtension(
+                new WidgetExtension());
     }
 
     public void onDestroy() {

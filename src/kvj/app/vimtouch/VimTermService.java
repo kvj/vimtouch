@@ -75,6 +75,7 @@ public class VimTermService extends Service implements TermSession.FinishCallbac
         compat.startForeground(RUNNING_NOTIFICATION, notification);
 
         Log.d(VimTermService.LOG_TAG, "VimTermService started");
+        VimTouchApp.getInstance();
         return;
     }
 
