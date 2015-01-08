@@ -11,7 +11,7 @@
         android:minSdkVersion="7"
         android:targetSdkVersion="19"
         />
-    <application android:icon="@drawable/app_vimtouch"
+    <application android:icon="@drawable/ic_app"
         android:label="@string/application_vimtouch"
         android:allowBackup="true"
         android:name=".VimTouchApp"
