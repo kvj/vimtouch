@@ -452,7 +452,7 @@ public class VimTouch extends ActionBarActivity implements
         */
 
         ActionBar actionBar = getSupportActionBar();
-        actionBarDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.drawable.app_vimtouch, R.drawable.app_vimtouch, R.drawable.app_vimtouch);
+        actionBarDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.drawable.ic_app, R.drawable.ic_app, R.drawable.ic_app);
         mTabSpinner = (Spinner) findViewById(R.id.tab_spinner);
         mTabSpinner.setVisibility(View.GONE);
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
