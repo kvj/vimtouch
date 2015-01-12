@@ -132,11 +132,16 @@ public class VimTermSession extends TermSession {
         if (settings.verifyPath()) {
             path = checkPath(path);
         }
-        String[] env = new String[3];
-        env[0] = "TERM=" + settings.getTermType();
-        env[1] = "PATH=" + path;
+        String[] env = new String[3*2];
 
-        env[2] = "HOME="+mApp;
+        env[0] = "TERM";
+        env[1] = settings.getTermType();
+
+        env[2] = "PATH";
+        env[3] = path;
+
+        env[4] = "HOME";
+        env[5] = mApp;
 
 
         mSuRoot = settings.getSuRoot();

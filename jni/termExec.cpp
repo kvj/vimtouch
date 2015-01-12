@@ -189,7 +189,7 @@ static void *thread_wrapper ( void* value)
             argv[i++] = runpath;
             argv[i++] = (char*)args;
             argv[i++] = NULL;
-            LOGI("execv: = %s %s %s", path, sock, (char*)thread_arg[4]);
+            LOGI("execv: = %s %s %s %s", path, sock, (char*)thread_arg[4], runpath);
             execv(argv[0] ,argv);
         }
 
@@ -238,15 +238,17 @@ static int create_subprocess(const char *cmd, const char* filepath, const char* 
 
     setenv("TMPDIR", tmpdir, 1);
     LOGI("tmpdir = '%s'", tmpdir);
-    setenv("TERM", "linux", 1);
-    // setenv("HOME", cmd, 1);
+    // setenv("TERM", "linux", 1);
+    // setenv("HOME", filepath, 1);
     setenv("TERMINFO", terminfodir, 1);
     LOGI("terminfo = '%s'", terminfodir);
 
     if (envp) {
-    LOGI("Haveenv");
-        for (; *envp; ++envp) {
-            putenv(*envp);
+        LOGI("Haveenv");
+        for (; *envp; envp += 2) {
+            setenv(*envp, *(envp+1), 1);
+            // putenv(*envp);
+            // LOGI("Putenv = '%s'", *envp);
         }
     }
 
