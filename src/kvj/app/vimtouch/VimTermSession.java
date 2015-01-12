@@ -34,6 +34,8 @@ public class VimTermSession extends TermSession {
 
     private String mApp;
     private String mUrl;
+    private final String mNativePath;
+    private final String mFilePath;
 
     public static final int PROCESS_EXIT_FINISHES_SESSION = 0;
     public static final int PROCESS_EXIT_DISPLAYS_MESSAGE = 1;
@@ -72,11 +74,13 @@ public class VimTermSession extends TermSession {
         }
     };
 
-    public VimTermSession(String app, String url, VimSettings settings,
+    public VimTermSession(String app, String nativePath, String filepath, String url, VimSettings settings,
                           String initialCommand) {
         super();
 
         mApp = app;
+        mNativePath = nativePath;
+        mFilePath = filepath;
         mUrl = url;
 
         updatePrefs(settings);
@@ -184,7 +188,7 @@ public class VimTermSession extends TermSession {
 
     private void createSubprocess(String shell, String[] env) {
 
-        mTermFd = Exec.createSubprocess(mApp, mUrl, getSuRoot()?"/system/xbin/su":null, env);
+        mTermFd = Exec.createSubprocess(mNativePath, mFilePath, mUrl, getSuRoot()?"/system/xbin/su":null, env);
         Log.i("TermSession", "FD: "+mTermFd);
     }
 

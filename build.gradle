@@ -4,7 +4,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.0.0-rc4'
+        classpath 'com.android.tools.build:gradle:1.0.0'
     }
 }
 repositories {
@@ -17,7 +17,7 @@ apply from: '../Configs/gradle/android.gradle'
 
 android {
 
-    compileSdkVersion 19
+    compileSdkVersion 21
     buildToolsVersion '19.1.0'
 
     defaultConfig {
@@ -32,7 +32,6 @@ android {
         compile project(':emulatorview')
         compile project(':aFileChooser')
         compile project(':BasePlugin')
-        compile 'com.android.support:appcompat-v7:20.0.+'
         compile project(':AutoUpdateApk')
     }
     

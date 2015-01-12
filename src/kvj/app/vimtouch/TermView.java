@@ -2,7 +2,6 @@ package kvj.app.vimtouch;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.os.Build;
 import android.os.Handler;
 import android.text.InputType;
 import android.util.DisplayMetrics;
@@ -69,9 +68,7 @@ public class TermView extends EmulatorView implements
         mSession = session;
         mGestureDetector = new GestureDetector(context, this);
         mScaleDetector = null;
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO) { // 2.2+
-            mScaleDetector = new ScaleDetectorCompat(this);
-        }
+        mScaleDetector = new ScaleDetectorCompat(this);
         mCheckRunnable = new Runnable() {
             public void run() {
                 if(!checkInsertMode() && mCheckCount < 10)

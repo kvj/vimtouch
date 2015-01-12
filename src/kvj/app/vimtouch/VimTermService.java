@@ -16,72 +16,38 @@
 
 package kvj.app.vimtouch;
 
-import android.app.Notification;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
-import android.os.Binder;
-import android.os.IBinder;
-import android.util.Log;
+
+import org.kvj.bravo7.SuperService;
 
 import jackpal.androidterm.emulatorview.TermSession;
-import kvj.app.vimtouch.compat.ServiceForegroundCompat;
 
-public class VimTermService extends Service implements TermSession.FinishCallback
+public class VimTermService extends SuperService<VimTouchRunner, VimTouchApp> implements TermSession.FinishCallback
 {
-    /* Parallels the value of START_STICKY on API Level >= 5 */
     public static final String LOG_TAG = "VimTermService";
-    private static final int COMPAT_START_STICKY = 1;
-
-    private static final int RUNNING_NOTIFICATION = 1;
-    private ServiceForegroundCompat compat;
-
-    public class TSBinder extends Binder {
-        VimTermService getService() {
-            Log.i("VimTermService", "Activity binding to service");
-            return VimTermService.this;
-        }
-    }
-    private final IBinder mTSBinder = new TSBinder();
-
-    @Override
-    public void onStart(Intent intent, int flags) {
-    }
-
-    /* This should be @Override if building with API Level >=5 */
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        return COMPAT_START_STICKY;
-    }
-
-    @Override
-    public IBinder onBind(Intent intent) {
-        return mTSBinder;
+    public VimTermService() {
+        super(VimTouchRunner.class, "VimTouch");
     }
 
     @Override
     public void onCreate() {
-        compat = new ServiceForegroundCompat(this);
+        super.onCreate();
+    }
 
-        /* Put the service in the foreground. */
-		Notification notification = new Notification(
-				R.drawable.ic_vim_notification,
-				getText(R.string.service_notify_text),
-				System.currentTimeMillis());
-        notification.flags |= Notification.FLAG_ONGOING_EVENT;
-        Intent notifyIntent = new Intent(this, VimTouch.class);
-        notifyIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notifyIntent, 0);
-        notification.setLatestEventInfo(this, getText(R.string.application_vimtouch), getText(R.string.service_notify_text), pendingIntent);
-        compat.startForeground(RUNNING_NOTIFICATION, notification);
-
-        Log.d(VimTermService.LOG_TAG, "VimTermService started");
-        VimTouchApp.getInstance();
-        return;
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        super.onStartCommand(intent, flags, startId);
+        raiseNotification(R.drawable.ic_vim_notification, "VimTouch is running",
+                VimTouch.class);
+        startForeground(notificationID, getNotification());
+        return Service.START_STICKY;
     }
 
     @Override
     public void onDestroy() {
-        return;
+        hideNotification();
+        super.onDestroy();
     }
 
     public void onSessionFinish(TermSession session) {

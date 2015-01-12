@@ -80,7 +80,6 @@ import java.util.List;
 
 import jackpal.androidterm.emulatorview.ColorScheme;
 import jackpal.androidterm.emulatorview.TermSession;
-import kvj.app.vimtouch.compat.AndroidCompat;
 import kvj.app.vimtouch.ext.manager.IntegrationManager;
 import kvj.app.vimtouch.ext.manager.impl.InputExtension;
 import kvj.app.vimtouch.ext.manager.impl.QuickbarExtension;
@@ -185,21 +184,7 @@ public class VimTouch extends ActionBarActivity implements
     private DownloadManager mDM;
     private int mScreenWidth;
 
-    private Intent TSIntent;
-    private VimTermService mService;
-
     private ArrayList<String> quickbarContents = null;
-    private ServiceConnection mTSConnection = new ServiceConnection() {
-        public void onServiceConnected(ComponentName className, IBinder service) {
-            VimTermService.TSBinder binder = (VimTermService.TSBinder) service;
-            mService = binder.getService();
-        }
-
-        public void onServiceDisconnected(ComponentName arg0) {
-            mService = null;
-        }
-    };
-
     private int mapControlChar(int result) {
         if (result >= 'a' && result <= 'z') {
             result = (char) (result - 'a' + '\001');
@@ -391,6 +376,7 @@ public class VimTouch extends ActionBarActivity implements
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     @Override
     public void onCreate(Bundle icicle) {
+        startService(new Intent(this, VimTermService.class));
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         mSettings = new VimSettings(getResources(), mPrefs);
 
@@ -410,13 +396,6 @@ public class VimTouch extends ActionBarActivity implements
         }
 
         mUrl = getIntentUrl(getIntent());
-
-        TSIntent = new Intent(this, VimTermService.class);
-        startService(TSIntent);
-
-        if (!bindService(TSIntent, mTSConnection, BIND_AUTO_CREATE)) {
-            Log.w(VimTouch.LOG_TAG, "bind to service failed!");
-        }
 
         if (Integer.valueOf(android.os.Build.VERSION.SDK) < 11) {
             requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -439,9 +418,7 @@ public class VimTouch extends ActionBarActivity implements
         mButtonBar = mTopButtonBar;
 
         mButtonBarLayout = (LinearLayout) findViewById(R.id.button_bar_layout);
-        if (AndroidCompat.SDK >= 11) {
-            mButtonBarLayout.setShowDividers(LinearLayout.SHOW_DIVIDER_MIDDLE);
-        }
+        mButtonBarLayout.setShowDividers(LinearLayout.SHOW_DIVIDER_MIDDLE);
         /*
         TextView button = (TextView)getLayoutInflater().inflate(R.layout.quickbutton, (ViewGroup)mButtonBarLayout, false);
         button.setText(R.string.title_keyboard);
@@ -486,10 +463,6 @@ public class VimTouch extends ActionBarActivity implements
 
     public void onDestroy() {
         super.onDestroy();
-        unbindService(mTSConnection);
-        stopService(TSIntent);
-        mService = null;
-        mTSConnection = null;
         IntegrationManager.getInstance(this).stop();
 
         System.runFinalizersOnExit(true);
@@ -505,13 +478,9 @@ public class VimTouch extends ActionBarActivity implements
     }
 
     private void startEmulator() {
-        File appDir = new File(getApplicationContext().getFilesDir().getParentFile(), "lib");
-        File[] files = appDir.listFiles();
-        for (File file : files) {
-            Log.w("File", file.getPath());
-        }
         String appPath = getApplicationContext().getFilesDir().getPath();
-        mSession = new VimTermSession(appPath, mUrl, mSettings, "");
+        String nativePath = getApplicationContext().getApplicationInfo().nativeLibraryDir;
+        mSession = new VimTermSession(appPath, nativePath, appPath, mUrl, mSettings, "");
         mSession.setFinishCallback(new TermSession.FinishCallback() {
             @Override
             public void onSessionFinish(TermSession session) {
@@ -1223,11 +1192,9 @@ public class VimTouch extends ActionBarActivity implements
         dialog.setCancelable(true);
 
         LinearLayout layout = (LinearLayout) dialog.findViewById(R.id.hist_layout);
-        if (AndroidCompat.SDK >= 11) {
-            layout.setShowDividers(
-                LinearLayout.SHOW_DIVIDER_BEGINNING | LinearLayout.SHOW_DIVIDER_MIDDLE
-                | LinearLayout.SHOW_DIVIDER_END);
-        }
+        layout.setShowDividers(
+            LinearLayout.SHOW_DIVIDER_BEGINNING | LinearLayout.SHOW_DIVIDER_MIDDLE
+            | LinearLayout.SHOW_DIVIDER_END);
         LayoutParams params = layout.getLayoutParams();
         params.width = mScreenWidth;
         layout.setLayoutParams(params);

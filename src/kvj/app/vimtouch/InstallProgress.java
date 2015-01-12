@@ -9,7 +9,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -130,10 +129,7 @@ public class InstallProgress extends Activity {
     }
     
     private static long fileSize(File file) {
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) { // 2.3+
-            return file.getTotalSpace();
-        }
-        return file.length();
+        return file.getTotalSpace();
     }
 
     public static void installSysVimrc(Activity activity) {
@@ -320,11 +316,8 @@ public class InstallProgress extends Activity {
     }
 
     private static void setReadableExecutable(File file) {
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) { // 2.3+
-            file.setExecutable(true, false);
-            file.setReadable(true, false);
-            return;
-        }
+        file.setExecutable(true, false);
+        file.setReadable(true, false);
     }
 
 

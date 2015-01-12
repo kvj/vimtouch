@@ -18,5 +18,6 @@ public class VimTouchApp extends ApplicationContext {
         autoUpdateApk = new AutoUpdateApk(this);
         autoUpdateApk.setUpdateInterval(AutoUpdateApk.DAYS);
         Logger.setOutput(new AndroidLogger());
+        publishBean(new VimTouchRunner());
     }
 }
